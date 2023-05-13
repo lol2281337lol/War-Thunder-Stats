@@ -9,8 +9,7 @@ app.use(cors());
 app.get('/fetch-data/:account', async (req, res) => {
   const { account } = req.params;
   const urls = [
-    `https://thunderskill.com/ru/stat/${account}/vehicles/a#type=army&role=all&country=all`,
-    `https://thunderskill.com/ru/stat/${account}/vehicles/a#type=aviation&role=all&country=all`
+    `https://thunderskill.com/ru/stat/${account}/vehicles/a#type=army&role=all&country=all`
   ];
 
   try {
