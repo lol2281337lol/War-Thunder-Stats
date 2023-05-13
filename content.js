@@ -16,31 +16,41 @@ async function fetchPage(url, account) {
 }
 
 function parseVehicles(htmlArray) {
-  const vehicles = [];
+    const airVehicles = [];
+    const landVehicles = [];
 
-  htmlArray.forEach((html, index) => {
-    console.log(`HTML content at index ${index}:`, html);
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const vehicleRows = doc.querySelectorAll('.vehicle_row');
+    htmlArray.forEach((html, index) => {
+        console.log(`HTML content at index ${index}:`, html);
 
-    console.log(`Parsing HTML array item at index ${index}: found ${vehicleRows.length} vehicle rows`);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const vehicleRows = doc.querySelectorAll('tr[data-role][data-country]');
 
-    vehicleRows.forEach((row) => {
-      const vehicleName = row.querySelector('.vehicle').dataset.sort;
-      const vehicleWinRate = row.querySelector('.vehicle_row_wins').textContent.trim();
-      const vehicleBattles = row.querySelector('.vehicle_row_battles').textContent.trim();
+        console.log(`Parsing HTML array item at index ${index}: found ${vehicleRows.length} vehicle rows`);
 
-      vehicles.push({
-        name: vehicleName,
-        winRate: vehicleWinRate,
-        battles: vehicleBattles,
-      });
+        vehicleRows.forEach((row) => {
+            const vehicleName = row.querySelector('.vehicle').dataset.sort;
+            const vehicleBattles = row.querySelector('.params li:first-child .param_value strong').textContent.trim();
+            const vehicleWinRate = row.querySelector('td[data-sort]:nth-child(4)').textContent.trim();
+
+            const vehicleData = {
+                name: vehicleName,
+                winRate: vehicleWinRate,
+                battles: vehicleBattles,
+            };
+
+            if (row.dataset.role.includes('bombers all') || row.dataset.role.includes('fighters all')) {
+                airVehicles.push(vehicleData);
+            } else {
+                landVehicles.push(vehicleData);
+            }
+        });
     });
-  });
 
-  return vehicles;
+    return { airVehicles, landVehicles };
 }
+
+
 
 
 
@@ -60,25 +70,26 @@ async function fetchVehicles(htmlArray) {
 
 
 async function fetchAndLogVehicles(account) {
-  if (!account) {
-    console.error('Account name not found');
-    return;
-  }
+    if (!account) {
+        console.error('Account name not found');
+        return;
+    }
 
-  try {
-    const data = await fetchPage(null, account);
-    const htmlArray = data.data;
+    try {
+        const data = await fetchPage(null, account);
+        const htmlArray = data.data;
 
-    // Выводим содержимое htmlArray перед вызовом функции fetchVehicles
-    console.log('Fetched HTML array:', htmlArray);
+        // Выводим содержимое htmlArray перед вызовом функции fetchVehicles
+        console.log('Fetched HTML array:', htmlArray);
 
-    const result = await fetchVehicles(htmlArray);
-    console.log('Vehicles for account', account, result);
-  } catch (error) {
-    console.error('Error fetching vehicles for account', account, error);
-  }
+        const result = await parseVehicles(htmlArray);
+
+        console.log('Air vehicles for account', account, result.airVehicles);
+        console.log('Land vehicles for account', account, result.landVehicles);
+    } catch (error) {
+        console.error('Error fetching vehicles for account', account, error);
+    }
 }
-
 
 
 
