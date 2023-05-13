@@ -74,22 +74,25 @@ async function fetchAndLogVehicles(account) {
         console.error('Account name not found');
         return;
     }
-
     try {
         const data = await fetchPage(null, account);
-        const htmlArray = data.data;
-
-        // Выводим содержимое htmlArray перед вызовом функции fetchVehicles
+        const htmlArray = data.data; 
         console.log('Fetched HTML array:', htmlArray);
-
         const result = await parseVehicles(htmlArray);
 
-        console.log('Air vehicles for account', account, result.airVehicles);
-        console.log('Land vehicles for account', account, result.landVehicles);
-    } catch (error) {
-        console.error('Error fetching vehicles for account', account, error);
+        const airVehiclesTable = createTable(result.airVehicles, 'Air Vehicles');
+		const landVehiclesTable = createTable(result.landVehicles, 'Land Vehicles');
+		const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
+    if (mainInfoContainer) {
+        mainInfoContainer.appendChild(airVehiclesTable);
+        mainInfoContainer.appendChild(landVehiclesTable);
     }
+
+} catch (error) {
+    console.error('Error fetching vehicles for account', account, error);
 }
+}
+
 
 
 
@@ -116,13 +119,17 @@ function createLoadingAnimation() {
 }
 
 window.addEventListener('load', () => {
-  console.log('Load event triggered.');
+    console.log('Load event triggered.');
+    const spanElements = Array.from(document.querySelectorAll('span[itemprop="name"]'));
+    const isWarThunderPage = spanElements.some((el) => el.textContent.trim() === 'War Thunder' || el.textContent.trim() === 'Вернуться к поиску War Thunder' );
+    console.log('Is War Thunder page?', isWarThunderPage);
+    if (isWarThunderPage) {
+        const accountNameElement = document.querySelector('.marketItemView--counters .counter .label');
+        const accountName = accountNameElement ? accountNameElement.textContent.trim() : '';
+        fetchAndLogVehicles(accountName);
+    }
+});
 
-  const spanElements = Array.from(document.querySelectorAll('span[itemprop="name"]'));
-  const isWarThunderPage = spanElements.some((el) =>
-    el.textContent.trim() === 'War Thunder' ||
-    el.textContent.trim() === 'Вернуться к поиску War Thunder'
-  );
 
   console.log('Is War Thunder page?', isWarThunderPage);
 
@@ -158,4 +165,42 @@ window.addEventListener('load', () => {
       }
     }
   }
-});
+;
+
+
+function createTable(dataArray, tableName) {
+    const table = document.createElement('table');
+    const headerRow = document.createElement('tr');
+    const nameHeader = document.createElement('th');
+    nameHeader.textContent = 'Name';
+    const winRateHeader = document.createElement('th');
+    winRateHeader.textContent = 'Win Rate';
+    const battlesHeader = document.createElement('th');
+    battlesHeader.textContent = 'Battles';
+    headerRow.appendChild(nameHeader);
+    headerRow.appendChild(winRateHeader);
+    headerRow.appendChild(battlesHeader);
+    table.appendChild(headerRow);
+
+    dataArray.forEach((dataItem) => {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        nameCell.textContent = dataItem.name;
+        const winRateCell = document.createElement('td');
+        winRateCell.textContent = dataItem.winRate;
+        const battlesCell = document.createElement('td');
+        battlesCell.textContent = dataItem.battles;
+        row.appendChild(nameCell);
+        row.appendChild(winRateCell);
+        row.appendChild(battlesCell);
+        table.appendChild(row);
+    });
+
+    const tableContainer = document.createElement('div');
+    const tableNameElement = document.createElement('h2');
+    tableNameElement.textContent = tableName;
+    tableContainer.appendChild(tableNameElement);
+    tableContainer.appendChild(table);
+
+    return tableContainer;
+}
