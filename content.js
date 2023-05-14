@@ -15,12 +15,13 @@ async function fetchPage(url, account) {
   return response.json();
 }
 
+
 function parseVehicles(htmlArray) {
     const airVehicles = [];
     const landVehicles = [];
 
     htmlArray.forEach((html, index) => {
-        console.log(`HTML content at index ${index}:`, html);
+        //console.log(`HTML content at index ${index}:`, html);
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
@@ -51,11 +52,6 @@ function parseVehicles(htmlArray) {
 }
 
 
-
-
-
-
-
 async function fetchVehicles(htmlArray) {
   const parser = new DOMParser();
   const landPage = parser.parseFromString(htmlArray[0], 'text/html');
@@ -66,7 +62,6 @@ async function fetchVehicles(htmlArray) {
 
   return [...landVehicles, ...airVehicles];
 }
-
 
 
 async function fetchAndLogVehicles(account) {
@@ -80,18 +75,21 @@ async function fetchAndLogVehicles(account) {
         console.log('Fetched HTML array:', htmlArray);
         const result = await parseVehicles(htmlArray);
 
-        const airVehiclesTable = createTable(result.airVehicles, 'Air Vehicles');
+        const airVehiclesTable = createTable(result.airVehicles, 'Воздушная техника');
 		airVehiclesTable.style.fontSize = '15px';
-		const landVehiclesTable = createTable(result.landVehicles, 'Land Vehicles');
+		const landVehiclesTable = createTable(result.landVehicles, 'Наземная техника');
 		landVehiclesTable.style.fontSize = '15px';
 const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
 if (mainInfoContainer) {
     const gridContainer = document.createElement('div');
     gridContainer.style.display = 'grid';
     gridContainer.style.gridTemplateColumns = '1fr 1fr';
-    gridContainer.appendChild(airVehiclesTable);
+
+    // First append the land vehicles, then the air vehicles
     gridContainer.appendChild(landVehiclesTable);
-	mainInfoContainer.appendChild(gridContainer);
+    gridContainer.appendChild(airVehiclesTable);
+
+    mainInfoContainer.appendChild(gridContainer);
 
     }
 
@@ -100,30 +98,6 @@ if (mainInfoContainer) {
 }
 }
 
-
-
-
-
-
-function createLoadingAnimation() {
-  const loadingElement = document.createElement('div');
-  loadingElement.style.fontSize = '19px';
-  loadingElement.style.marginBottom = '5px';
-  loadingElement.style.whiteSpace = 'nowrap';
-  loadingElement.style.textOverflow = 'ellipsis';
-  loadingElement.style.fontWeight = 'normal';
-
-  let dots = '.';
-  loadingElement.textContent = 'Загрузка' + dots;
-
-  const updateDots = () => {
-    dots = dots.length < 3 ? dots + '.' : '.';
-    loadingElement.textContent = 'Загрузка' + dots;
-  };
-
-  setInterval(updateDots, 500);
-  return loadingElement;
-}
 
 window.addEventListener('load', () => {
     console.log('Load event triggered.');
@@ -138,30 +112,15 @@ window.addEventListener('load', () => {
 });
 
 
-  console.log('Is War Thunder page?', isWarThunderPage);
-
-  if (isWarThunderPage) {
-    const accountNameElement = document.querySelector('.marketItemView--counters .counter .label');
-    const accountName = accountNameElement ? accountNameElement.textContent.trim() : '';
-
-    fetchAndLogVehicles(accountName);
-    if (accountName) {
-      const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
-      console.log('Main info container found?', !!mainInfoContainer);
-        ;
-      }
-    }
-  
-;
-
-
 function createTable(dataArray, tableName) {
+    // Sort the dataArray by descending 'battles'
+    dataArray.sort((a, b) => parseInt(b.battles) - parseInt(a.battles));
     const table = document.createElement('table');
     const headerRow = document.createElement('tr');
     const nameHeader = document.createElement('th');
-    nameHeader.textContent = 'Name';
+    nameHeader.textContent = 'Name           ';
     const winRateHeader = document.createElement('th');
-    winRateHeader.textContent = 'Win Rate';
+    winRateHeader.textContent = 'Win Rate     ';
     const battlesHeader = document.createElement('th');
     battlesHeader.textContent = 'Battles';
     headerRow.appendChild(nameHeader);
