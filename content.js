@@ -81,11 +81,18 @@ async function fetchAndLogVehicles(account) {
         const result = await parseVehicles(htmlArray);
 
         const airVehiclesTable = createTable(result.airVehicles, 'Air Vehicles');
+		airVehiclesTable.style.fontSize = '15px';
 		const landVehiclesTable = createTable(result.landVehicles, 'Land Vehicles');
-		const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
-    if (mainInfoContainer) {
-        mainInfoContainer.appendChild(airVehiclesTable);
-        mainInfoContainer.appendChild(landVehiclesTable);
+		landVehiclesTable.style.fontSize = '15px';
+const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
+if (mainInfoContainer) {
+    const gridContainer = document.createElement('div');
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gridTemplateColumns = '1fr 1fr';
+    gridContainer.appendChild(airVehiclesTable);
+    gridContainer.appendChild(landVehiclesTable);
+	mainInfoContainer.appendChild(gridContainer);
+
     }
 
 } catch (error) {
@@ -138,33 +145,13 @@ window.addEventListener('load', () => {
     const accountName = accountNameElement ? accountNameElement.textContent.trim() : '';
 
     fetchAndLogVehicles(accountName);
-
     if (accountName) {
       const mainInfoContainer = document.querySelector('.marketItemView--mainInfoContainer');
-
       console.log('Main info container found?', !!mainInfoContainer);
-
-      if (mainInfoContainer) {
-        const labels = ['Премиумов за З.О.', 'Премиумов за GJN', 'Пакетные/акционные премиумы'];
-        labels.forEach((label) => {
-          const counter = document.createElement('div');
-          counter.classList.add('counter');
-
-          const labelText = createLoadingAnimation();
-
-          const labelMuted = document.createElement('div');
-          labelMuted.classList.add('muted');
-          labelMuted.textContent = label;
-
-          counter.appendChild(labelText);
-          counter.appendChild(labelMuted);
-          mainInfoContainer.appendChild(counter);
-
-          console.log('Added new element:', label);
-        });
+        ;
       }
     }
-  }
+  
 ;
 
 
@@ -201,6 +188,13 @@ function createTable(dataArray, tableName) {
     tableNameElement.textContent = tableName;
     tableContainer.appendChild(tableNameElement);
     tableContainer.appendChild(table);
+
+    tableContainer.style.marginBottom = '5px';
+    tableContainer.style.whiteSpace = 'nowrap';
+    tableContainer.style.display = 'inline-block';
+    tableContainer.style.margin = '0 25px 15px 0';
+    tableContainer.style.width = '26%';
+    tableContainer.style.fontFamily = '-apple-system, BlinkMacSystemFont, \'Open Sans\', HelveticaNeue, sans-serif';
 
     return tableContainer;
 }
