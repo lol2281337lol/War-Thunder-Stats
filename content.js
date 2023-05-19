@@ -14,6 +14,7 @@ async function fetchPage(url, account) {
 }
 
 function parseVehicles(htmlArray, vehiclesData) {
+  console.log('vehiclesData:', vehiclesData);
   let gjnSum = 0;
   let zoSum = 0;
   const airVehicles = [];
@@ -89,6 +90,7 @@ async function fetchVehicles(htmlArray) {
 
 
 async function fetchAndLogVehicles(account) {
+	
     if (!account) {
         console.error('Account name not found');
         return;
@@ -101,12 +103,14 @@ async function fetchAndLogVehicles(account) {
         console.log('Fetched HTML array:', htmlArray);
 
         const result = await parseVehicles(htmlArray, vehiclesData);
+        logVehiclesInfo(account, result);
 
         const airVehiclesTable = createTable(result.airVehicles, 'Air Vehicles');
 		airVehiclesTable.style.fontSize = '15px';
         const landVehiclesTable = createTable(result.landVehicles, 'Land Vehicles');
 		landVehiclesTable.style.fontSize = '15px';
         const premiumVehiclesTable = createTable(result.premiumVehicles, 'Premium Vehicles');
+        premiumVehiclesTable.style.fontSize = '15px';
 
         const airVehiclesBattles = result.airVehicles.reduce((sum, vehicle) => sum + parseInt(vehicle.battles), 0);
         const landVehiclesBattles = result.landVehicles.reduce((sum, vehicle) => sum + parseInt(vehicle.battles), 0);
@@ -217,6 +221,23 @@ window.addEventListener('load', () => {
         fetchAndLogVehicles(accountName);
     }
 });
+
+function logVehiclesInfo(accountName, vehiclesInfo) {
+    const { landVehicles, airVehicles } = vehiclesInfo;
+
+    // Sort the vehicles based on the number of battles, descending
+    landVehicles.sort((a, b) => parseInt(b.battles) - parseInt(a.battles));
+    airVehicles.sort((a, b) => parseInt(b.battles) - parseInt(a.battles));
+
+    // Get the vehicle names
+    const landVehiclesNames = landVehicles.map(vehicle => vehicle.name);
+    const airVehiclesNames = airVehicles.map(vehicle => vehicle.name);
+
+    // Log the information to the console
+    console.log(`Land Vehicles to ${accountName}: ${landVehiclesNames.join(', ')}`);
+    console.log(`Air Vehicles to ${accountName}: ${airVehiclesNames.join(', ')}`);
+}
+
 
 
 function createTable(dataArray, tableName) {
